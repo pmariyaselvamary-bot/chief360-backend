@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String     @id @default(uuid())
+  name             String
+  email            String     @unique
+  password         String
+  role             String     @default("Executive")
+  avatarUrl        String?
+  twoFactorSecret  String?
+  isTwoFactorEnabled Boolean  @default(false)
+  createdAt        DateTime   @default(now())
+  
+  tasks            Task[]
+  schedules        Schedule[]
+  roles            Role[]
+  notifications    Notification[]
+}
+
+model Task {
+  id         String   @id @default(uuid())
+  title      String
+  context    String
+  deadline   DateTime
+  completed  Boolean  @default(false)
+  highImpact Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Schedule {
+  id        String   @id @default(uuid())
+  title     String
+  type      String   // 'working', 'free', 'planning'
+  startTime DateTime
+  endTime   DateTime
+  context   String?
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Role {
+  id         String   @id @default(uuid())
+  name       String           // "TechCorp Solutions", "Global Ventures"
+  title      String           // "CEO", "Board Member", "Trustee"
+  icon       String   @default("Building2")  // lucide icon name
+  active     Boolean  @default(false)
+  hours      Float    @default(0)
+  taskCount  Int      @default(0)
+  kpiStatus  String   @default("On Track") // "On Track", "Needs Attention", "Ahead", "Behind"
+  color      String   @default("#f72585")
+  createdAt  DateTime @default(now())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   @default("info")  // 'warning', 'info', 'success', 'error'
+  icon      String   @default("Bell")  // lucide icon name
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
