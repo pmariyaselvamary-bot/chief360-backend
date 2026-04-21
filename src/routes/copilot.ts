@@ -1,10 +1,10 @@
 import express, { Response } from 'express';
-import { Ollama } from 'ollama';
+import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '../index';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
-const ollama = new Ollama({ host: 'http://127.0.0.1:11434' });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 router.use(authMiddleware);
 
@@ -75,16 +75,13 @@ Keep your responses professional, incredibly concise, and actionable. Do not use
 LIVE DATA SNAPSHOT:
 ${contextData}`;
 
-        const chatResponse = await ollama.chat({
-            model: 'phi3', // Defaulting to phi3 as requested
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: query }
-            ]
+        const chatResponse = await anthropic.messages.create({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 1000,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: query }]
         });
-
-        response = chatResponse.message.content;
-
+        response = (chatResponse.content[0] as any).text;
         res.json({ response });
     } catch (err: any) {
         res.status(500).json({ message: err.message });
