@@ -1,10 +1,10 @@
 import express, { Response } from 'express';
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 import { prisma } from '../index';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 router.use(authMiddleware);
 
@@ -75,13 +75,14 @@ Keep your responses professional, incredibly concise, and actionable. Do not use
 LIVE DATA SNAPSHOT:
 ${contextData}`;
 
-        const chatResponse = await anthropic.messages.create({
-           model: 'claude-haiku-4-5',
-            max_tokens: 1000,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: query }]
+     const chatResponse = await groq.chat.completions.create({
+            model: 'llama3-8b-8192',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: query }
+            ]
         });
-        response = (chatResponse.content[0] as any).text;
+        response = chatResponse.choices[0].message.content || '';
         res.json({ response });
     } catch (err: any) {
         res.status(500).json({ message: err.message });
