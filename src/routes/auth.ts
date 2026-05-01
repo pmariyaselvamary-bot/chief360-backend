@@ -166,3 +166,4 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
 });
 
 export default router;
+// nodemailer v2
