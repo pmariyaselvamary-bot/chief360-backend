@@ -4,16 +4,9 @@ import jwt from 'jwt-simple';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { prisma } from '../index';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-    },
-});
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret-1234';
 
