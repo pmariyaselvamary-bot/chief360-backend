@@ -4,6 +4,15 @@ import jwt from 'jwt-simple';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { prisma } from '../index';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+    },
+});
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret-1234';
@@ -135,11 +144,23 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: "Email not found." });
         }
-
         const resetToken = jwt.encode({ id: user.id, email: user.email, purpose: 'reset' }, JWT_SECRET);
-        res.json({ message: "Password reset link sent to your email!", resetToken });
-    } catch (error: any) {
-        res.status(500).json({ message: error.message });
+        const resetLink = `https://chief360-web.vercel.app/reset-password?token=${resetToken}`;
+
+        await transporter.sendMail({
+            from: process.env.GMAIL_USER,
+            to: email,
+            subject: 'Chief360 - Password Reset Link',
+            html: `
+                <h2>Password Reset Request</h2>
+                <p>Click the link below to reset your password:</p>
+                <a href="${resetLink}" style="background:#F72585;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;">Reset Password</a>
+                <p>This link expires in 1 hour.</p>
+                <p>If you did not request this, ignore this email.</p>
+            `,
+        });
+
+        res.json({ message: "Password reset link sent to your email!" });
     }
 });
 
