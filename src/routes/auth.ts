@@ -159,9 +159,9 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
                 <p>If you did not request this, ignore this email.</p>
             `,
         });
-
         res.json({ message: "Password reset link sent to your email!" });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
     }
 });
-
 export default router;
