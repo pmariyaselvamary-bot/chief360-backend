@@ -140,8 +140,8 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
         const resetToken = jwt.encode({ id: user.id, email: user.email, purpose: 'reset' }, JWT_SECRET);
         const resetLink = `https://chief360-web.vercel.app/reset-password?token=${resetToken}`;
 
-        await transporter.sendMail({
-            from: process.env.GMAIL_USER,
+        await resend.emails.send({
+            from: 'Chief360 <onboarding@resend.dev>',
             to: email,
             subject: 'Chief360 - Password Reset Link',
             html: `
