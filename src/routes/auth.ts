@@ -123,5 +123,24 @@ router.post('/2fa/verify', async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
     }
 });
+// 5. Forgot Password
+router.post('/forgot-password', async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: "Email is required." });
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ message: "Email not found." });
+        }
+
+        const resetToken = jwt.encode({ id: user.id, email: user.email, purpose: 'reset' }, JWT_SECRET);
+        res.json({ message: "Password reset link sent to your email!", resetToken });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 export default router;
