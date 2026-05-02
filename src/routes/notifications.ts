@@ -32,6 +32,23 @@ router.post('/', async (req: AuthRequest, res: Response) => {
                 icon: icon || 'Bell'
             }
         });
+
+        // Send email notification via Resend
+        try {
+            const user = await prisma.user.findUnique({ where: { id: req.userId! } });
+            if (user?.email) {
+                const { Resend } = await import('resend');
+                const resend = new Resend(process.env.RESEND_API_KEY);
+                await resend.emails.send({
+                    from: 'Chief360 <onboarding@resend.dev>',
+                    to: user.email,
+                    subject: `⏰ Chief360 - ${title}`,
+                    html: `<h2>${title}</h2><p>${message}</p>`,
+                });
+            }
+        } catch (e) {}
+
+        res.status(201).json(notification);
         res.status(201).json(notification);
     } catch (err: any) {
         res.status(400).json({ message: err.message });
