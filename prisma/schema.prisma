@@ -15,6 +15,7 @@ model User {
   avatarUrl        String?
   twoFactorSecret  String?
   isTwoFactorEnabled Boolean  @default(false)
+  fcmToken         String?
   createdAt        DateTime   @default(now())
   
   tasks            Task[]
