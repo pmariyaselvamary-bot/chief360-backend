@@ -14,6 +14,16 @@ import notificationRoutes from './routes/notifications';
 import dashboardRoutes from './routes/dashboard';
 import intelligenceRoutes from './routes/intelligence';
 import copilotRoutes from './routes/copilot';
+import * as admin from 'firebase-admin';
+
+if (!admin.apps.length) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
+}
+
+export const firebaseAdmin = admin;
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
