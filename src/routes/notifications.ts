@@ -85,5 +85,27 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
         res.status(400).json({ message: err.message });
     }
 });
+// POST /api/notifications/send-push — Send FCM push notification
+router.post('/send-push', async (req: AuthRequest, res: Response) => {
+    try {
+        const { title, message, fcmToken } = req.body;
+        if (!fcmToken) return res.status(400).json({ message: "FCM token required" });
+        
+        const { firebaseAdmin } = await import('../index');
+        await firebaseAdmin.messaging().send({
+            token: fcmToken,
+            notification: {
+                title,
+                body: message,
+            },
+            android: {
+                priority: 'high',
+            },
+        });
+        res.json({ message: "Push notification sent!" });
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 export default router;
