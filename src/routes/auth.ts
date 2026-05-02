@@ -157,6 +157,24 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
     }
 });
+// 6. Save FCM Token
+router.post('/fcm-token', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.decode(token, JWT_SECRET) as { id: string };
+        const { fcmToken } = req.body;
+        if (!fcmToken) return res.status(400).json({ message: "FCM token required" });
+        await prisma.user.update({
+            where: { id: decoded.id },
+            data: { fcmToken }
+        });
+        res.json({ message: "FCM token saved!" });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 export default router;
 // nodemailer v2
