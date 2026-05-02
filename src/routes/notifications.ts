@@ -49,7 +49,6 @@ router.post('/', async (req: AuthRequest, res: Response) => {
         } catch (e) {}
 
         res.status(201).json(notification);
-        res.status(201).json(notification);
     } catch (err: any) {
         res.status(400).json({ message: err.message });
     }
